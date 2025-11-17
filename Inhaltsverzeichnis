@@ -1,0 +1,190 @@
+a) Erstelle eine Seite mit folgendem Inhaltsverzeichnis:
+# **Teil 1 – Grundverständnis**
+
+## 1. Was ist IBM i?
+
+- Architektur, Historie
+- Library-Konzept, Objekte, Single-Level-Store
+- Rollenverständnis: Operator vs. Entwickler
+
+## 2. Arbeiten auf der IBM i
+
+- Green-Screen, ACS, 5250
+- Navigation, PF-Tasten, Hilfe-System
+- Menüs und typische Arbeitsoberflächen
+
+---
+
+# **Teil 2 – Work Management**
+
+## 3. Subsysteme
+
+- Aufbau, Zweck
+- Wichtige Subsysteme (QINTER, QBATCH, QSPL etc.)
+- Starten/Stoppen, Status erkennen (STRSBS, ENDSBS)
+
+## 4. Jobs verstehen
+
+- Interactive vs. Batch
+- Jobstruktur, Jobattribute
+- WRKJOB, WRKUSRJOB, WRKACTJOB
+- MSGW: was es bedeutet, wie man reagiert
+- Job-Logs lesen und typische Muster erkennen
+
+## 5. Warteschlangen im Alltag
+
+- OUTQ (Druckqueues), JOBQ (Jobqueues), MSGQ
+- WRKOUTQ, WRKJOBQ, WRKMSGQ
+- Staus erkennen, freigeben, Druckprobleme lösen
+
+---
+
+# **Teil 3 – Arbeiten mit Daten**
+
+## 6. Objekte und Bibliotheken
+
+- WRKOBJ, DSPOBJD
+- Libraries, Library Lists, *LIBL
+- Filetypen: PF, LF, SAVF, CMD, PRTF, DSPF
+
+## 7. Mit Daten arbeiten
+
+- STRSQL für Operator: grundlegende SELECTs
+- RUNQRY & Query Tool
+- DSPFFD, DSPPFM, DSPLIB
+
+## 8. Journaling & Recovery
+
+- Was ist ein Journal?
+- Wofür wird es genutzt?
+- Journalstatus prüfen, typische Probleme erkennen
+
+---
+
+# **Teil 4 – Systembetrieb**
+
+## 9. Systemüberwachung
+
+- WRKSYSSTS
+- Performance-Übersichten (WRKSYSACT, WRKDSKSTS)
+- CPU, Speicher, disk pooling verstehen
+- Jobs, die „hängen“ vs. Jobs, die „arbeiten“
+
+## 10. Nachrichten & Operator-Aufgaben
+
+- QSYSOPR: lesen, verstehen, filtern
+- Reaktionen auf Systemnachrichten
+- Nachrichtentexte richtig interpretieren
+
+## 11. Backup & Restore (BRMS optional)
+
+- Grundkonzepte von SAVLIB, SAVOBJ
+- Sicherungen prüfen
+- Restore-Grundlagen: RSTLIB, RSTOBJ
+- Handling von Savefiles (SAVF)
+
+---
+
+# **Teil 5 – Sicherheit**
+
+## 12. Benutzer & Berechtigungen
+
+- Benutzerprofile anlegen (GRTOBJAUT, CHGUSRPRF)
+- Gruppenprofile
+- Passwortpolitik
+- Authority Concepts: *PUBLIC, Adopted Authority
+
+## 13. Audit & Logging
+
+- Objektänderungsprotokolle
+- System Logs (DSPLOG)
+- Wichtige Befehle für Überblick
+
+---
+
+# **Teil 6 – Betrieb im Alltag**
+
+## 14. Typische Fehler und deren Analyse
+
+- Job in MSGW
+- Full-outqueue
+- Locking-Probleme (WRKOBJLCK)
+- Dateikorruption (selten, aber wichtig)
+
+## 15. Schnittstellen & Dateien im IFS
+
+- IFS-Struktur
+- Arbeiten mit CPY, CPYTOSTMF, CPYFRMSTMF
+- Monitoring von Schnittstellenordnern
+- Permissions im IFS
+
+## 16. Systemupdates & PTFs (kurz)
+
+- PTF-Konzept
+- ACS-PTF-Funktion
+- What to know as operator (Nicht: Wie man alles selbst einspielt)
+
+---
+
+# **Teil 7 – Praxisfälle**
+
+## 17. Fall 1: Job hängt in MSGW
+
+- Ursachen
+- Analyse
+- Vorgehen
+
+## 18. Fall 2: OUTQ staut
+
+- Druck hängt
+- Spoolfiles prüfen
+- Konfiguration verstehen
+
+## 19. Fall 3: Batchjobs laufen nicht mehr
+
+- JOBQ blockiert
+- Subsystem-Probleme
+- Abhängigkeiten prüfen
+
+## 20. Fall 4: Schnittstelle steht still
+
+- Datei nicht angekommen
+- Locking
+- Fehlermeldungen in QSYSOPR
+- Troubleshooting
+
+---
+
+# **Teil 8 – Professionalität**
+
+## 21. Operator-Routinen
+
+- Tagescheckliste
+- Wochen- und Monatsaufgaben
+- Protokollierung
+- Kommunikation mit Admins & Devs
+
+## 22. Zusammenarbeit und Rollen
+
+- Wann zum Entwickler?
+- Wann zum Admin/Architekt?
+- Wie man professionell dokumentiert
+
+---
+
+# **Teil 9 – Ausblick**
+
+## 23. Die Plattform heute und morgen
+
+- Modernisierung
+- Integration
+- Zukunft von IBM i
+- Wie Operator in Richtung Sysadmin oder Systementwickler wachsen können
+b) und gehe sinnvoll, in rationaler Tiefe für Einsteiger:innen und (Berufseinsteiger/Quereinsteiger) auf folgendes ein im ersten Teil:
+# **Teil 1 – Grundverständnis**
+
+## 1. Was ist IBM i?
+
+- Architektur, Historie
+- Library-Konzept, Objekte, Single-Level-Store
+- Rollenverständnis: Operator vs. Entwickler
