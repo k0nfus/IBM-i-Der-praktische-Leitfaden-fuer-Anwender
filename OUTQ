@@ -1,6 +1,6 @@
 # IBM i – Der praktische Leitfaden für Anwender:innen
 
-Dieses Dokument führt Berufseinsteiger:innen und Quereinsteiger:innen mit Operator-Aufgaben in die Plattform IBM i ein. Es ist so aufgebaut, dass Sie das Inhaltsverzeichnis als Navigationshilfe nutzen können und in Teil 1 direkt das notwendige Grundverständnis erhalten.
+Dieses Dokument führt Berufseinsteiger:innen und Quereinsteiger:innen mit Operator-Aufgaben in die Plattform IBM i ein. Es ist so aufgebaut, dass Sie die Seite **OUTQ** als zentrale Navigationshilfe nutzen können und in Teil 1 direkt das notwendige Grundverständnis erhalten.
 
 ---
 
@@ -9,17 +9,25 @@ Dieses Dokument führt Berufseinsteiger:innen und Quereinsteiger:innen mit Opera
 ## 1. Was ist IBM i?
 
 ### Architektur & Historie
-IBM i ist das aktuelle Betriebssystem für die Power-Systems-Plattform von IBM und der direkte Nachfolger von OS/400 bzw. i5/OS. Die Wurzeln reichen bis Ende der 1980er-Jahre zurück, als AS/400-Systeme speziell für mittelständische Unternehmen entwickelt wurden. Die Architektur ist eng mit der IBM Power-Hardware verzahnt: Das Betriebssystem enthält den Hypervisor (Licensed Internal Code, LIC) und bietet dadurch eine robuste Virtualisierung, integrierte Datenbank (Db2 for i) und standardisierte Sicherheitsmechanismen. Das Zusammenspiel von Hardware und Betriebssystem ist stark integriert, wodurch Administrator:innen weniger Einzelsysteme pflegen müssen als auf klassischen x86-Stacks.
+IBM i ist das aktuelle Betriebssystem für die Power-Systems-Plattform von IBM und der direkte Nachfolger von OS/400 bzw. i5/OS. Die Wurzeln reichen bis Ende der 1980er-Jahre zurück, als AS/400-Systeme speziell für mittelständische Unternehmen entwickelt wurden. Die Architektur ist eng mit der IBM Power-Hardware verzahnt: Das Betriebssystem enthält den Hypervisor (Licensed Internal Code, LIC) und bietet dadurch eine robuste Virtualisierung, integrierte Datenbank (Db2 for i) und standardisierte Sicherheitsmechanismen. Das Zusammenspiel von Hardware und Betriebssystem ist stark integriert, wodurch Administrator:innen weniger Einzelsysteme pflegen müssen als auf klassischen x86-Stacks. Typische Begriffe, die Sie kennen sollten:
+- **LPAR** (Logical Partition): Virtuelle Instanz einer Power-Server-Hardware. LPARs teilen sich CPU, Speicher und I/O, werden über den Hardware Management Console (HMC) verwaltet und bilden die Basis für Produktions-, Test- oder HA-Umgebungen.
+- **LIC** (Licensed Internal Code): Firmware-Schicht und Hypervisor. Über `SST`/`DST` greifen Sie auf Diagnosefunktionen zu.
+- **PTF** (Program Temporary Fix): Offizielle IBM-Patches für Betriebssystem, Datenbank oder Middleware. Installation und Prüfung erfolgen über ACS oder Befehle wie `SNDPTFORD`, `LODPTF` und `APYPTF`, Übersicht liefert `DSPPTF`.
 
 ### Library-Konzept, Objekte & Single-Level-Store
-IBM i speichert alles als „Objekt“: Programme, Dateien, Warteschlangen, Benutzerprofile oder sogar Verzeichnisse. Objekte liegen in Bibliotheken (Libraries), die ähnlich wie Ordner funktionieren, aber zusätzlich eine Suche über die Library List (*LIBL) erlauben. Die Library List definiert die Reihenfolge, in der das System nach Objekten sucht; so können Anwendungen ohne harte Pfade arbeiten. Die zugrunde liegende Speicherverwaltung wird Single-Level-Store genannt: Plattenspeicher und Arbeitsspeicher werden vom System als ein großer Adressraum betrachtet. Dadurch müssen Operator:innen sich nicht um Laufwerksbuchstaben oder Mount-Punkte kümmern – Objekte bleiben logisch an ihrem Ort, egal auf welchem physischen Medium sie liegen.
+IBM i speichert alles als „Objekt“: Programme, Dateien, Warteschlangen, Benutzerprofile oder sogar Verzeichnisse. Objekte liegen in Bibliotheken (Libraries), die ähnlich wie Ordner funktionieren, aber zusätzlich eine Suche über die Library List (*LIBL) erlauben. Die Library List definiert die Reihenfolge, in der das System nach Objekten sucht; so können Anwendungen ohne harte Pfade arbeiten. Nutzen Sie `WRKLIBL`, `ADDLIBLE` oder `CHGLIBL`, um Library Lists anzupassen. Häufige Objektarten im Alltag:
+- **JOBQ** (Job Queue): Warteschlange, in der Batch-Jobs warten, bis ein Subsystem sie übernimmt. Verwaltung über `WRKJOBQ` oder `CHGJOBQ`.
+- **OUTQ** (Output Queue): Druck- oder Spool-Warteschlange. Störungen erkennen Sie mit `WRKOUTQ`, Status „HLD“ oder „MSGW“ erfordert Eingriffe.
+- **MSGQ** (Message Queue): Nachrichten- oder Alarm-Queue, z. B. `QSYSOPR`. Mit `WRKMSGQ` lesen, beantworten oder löschen Sie Einträge.
+- **USRPRF** (User Profile): Benutzer:innenkonto, verwaltet mit `DSPUSRPRF`, `CHGUSRPRF` oder `CRTUSRPRF`.
+Die zugrunde liegende Speicherverwaltung wird Single-Level-Store genannt: Plattenspeicher und Arbeitsspeicher werden vom System als ein großer Adressraum betrachtet. Dadurch müssen Operator:innen sich nicht um Laufwerksbuchstaben oder Mount-Punkte kümmern – Objekte bleiben logisch an ihrem Ort, egal auf welchem physischen Medium sie liegen. Auch das Integrated File System (IFS) nutzt dieses Konzept, sodass Pfade wie `/home` oder `/QSYS.LIB` gleichermaßen angesprochen werden können.
 
 ### Rollenverständnis: Operator vs. Entwickler
 Auf IBM i arbeiten mehrere Rollen eng zusammen:
-- **Operator:innen** überwachen Subsysteme, Jobs, Warteschlangen und Nachrichten. Sie reagieren auf Störungen, stoßen Sicherungen an und dokumentieren den Systemzustand.
-- **Entwickler:innen** erstellen Anwendungen (z. B. RPG, COBOL, CL, SQL) und definieren Abläufe. Sie benötigen Operator-Feedback zu Laufzeitproblemen, verlassen sich aber darauf, dass Operator:innen das System stabil halten.
-- **Admins/Architekt:innen** definieren Sicherheit, Netzwerke, PTF-Stände und strategische Vorgaben.
-Ein gesundes Rollenverständnis bedeutet: Operator:innen wissen, wann sie Eingriffe selbst vornehmen (Job neu starten, Druckqueue leeren) und wann sie Entwickler:innen oder Admins einbinden (Programmfehler, Authority-Fragen). Dokumentation und Kommunikation sind daher essenziell.
+- **Operator:innen** überwachen Subsysteme (`WRKSBS`), Jobs (`WRKACTJOB`), Warteschlangen (`WRKJOBQ`, `WRKOUTQ`) und Nachrichten (`WRKMSGQ QSYSOPR`). Sie reagieren auf Störungen, stoßen Sicherungen (`SAVLIB`, BRMS) an, initiieren IPLs und dokumentieren den Systemzustand. Typisch ist die Pflege von `JOBQ`-Einträgen, das Bearbeiten von Spool-Dateien oder das Quittieren von Meldungen mit Schweregrad > 70.
+- **Entwickler:innen** erstellen Anwendungen (z. B. RPG, COBOL, CL, SQL) und definieren Abläufe. Sie liefern Anweisungen, wie Operator:innen Fehlerbilder analysieren (z. B. mithilfe von `DSPJOBLOG` oder `WRKPRB`). Bei Authority-Problemen setzen sie `GRTOBJAUT`/`RVKOBJAUT` ein.
+- **Admins/Architekt:innen** definieren Sicherheit, Netzwerke, PTF-Stände und strategische Vorgaben. Sie planen `PTF`-Fenster, pflegen User-Exit-Programme und verwalten Systemwerte (`WRKSYSVAL`).
+Ein gesundes Rollenverständnis bedeutet: Operator:innen wissen, wann sie Eingriffe selbst vornehmen (Job neu starten, Druckqueue leeren, Nachrichten beantworten) und wann sie Entwickler:innen oder Admins einbinden (Programmfehler, Authority-Fragen, PTF-Rollbacks). Dokumentation und Kommunikation – etwa über Runbooks oder Ticket-Systeme – sind daher essenziell.
 
 ## 2. Arbeiten auf der IBM i
 - **Green-Screen, ACS, 5250**: Die klassische Bedienoberfläche ist ein 5250-Terminal. Heute wird sie häufig über Access Client Solutions (ACS) oder Web-Terminals bereitgestellt. Operator:innen sollten sowohl den Green-Screen als auch ACS-Funktionen kennen (SQL-Editor, PTF-Management, IFS-Zugriff).
