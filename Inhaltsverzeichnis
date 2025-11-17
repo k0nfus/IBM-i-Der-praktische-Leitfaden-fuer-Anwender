@@ -1,190 +1,125 @@
-a) Erstelle eine Seite mit folgendem Inhaltsverzeichnis:
+# IBM i – Der praktische Leitfaden für Anwender:innen
+
+Dieses Dokument führt Berufseinsteiger:innen und Quereinsteiger:innen mit Operator-Aufgaben in die Plattform IBM i ein. Es ist so aufgebaut, dass Sie das Inhaltsverzeichnis als Navigationshilfe nutzen können und in Teil 1 direkt das notwendige Grundverständnis erhalten.
+
+---
+
 # **Teil 1 – Grundverständnis**
 
 ## 1. Was ist IBM i?
 
-- Architektur, Historie
-- Library-Konzept, Objekte, Single-Level-Store
-- Rollenverständnis: Operator vs. Entwickler
+### Architektur & Historie
+IBM i ist das aktuelle Betriebssystem für die Power-Systems-Plattform von IBM und der direkte Nachfolger von OS/400 bzw. i5/OS. Die Wurzeln reichen bis Ende der 1980er-Jahre zurück, als AS/400-Systeme speziell für mittelständische Unternehmen entwickelt wurden. Die Architektur ist eng mit der IBM Power-Hardware verzahnt: Das Betriebssystem enthält den Hypervisor (Licensed Internal Code, LIC) und bietet dadurch eine robuste Virtualisierung, integrierte Datenbank (Db2 for i) und standardisierte Sicherheitsmechanismen. Das Zusammenspiel von Hardware und Betriebssystem ist stark integriert, wodurch Administrator:innen weniger Einzelsysteme pflegen müssen als auf klassischen x86-Stacks.
+
+### Library-Konzept, Objekte & Single-Level-Store
+IBM i speichert alles als „Objekt“: Programme, Dateien, Warteschlangen, Benutzerprofile oder sogar Verzeichnisse. Objekte liegen in Bibliotheken (Libraries), die ähnlich wie Ordner funktionieren, aber zusätzlich eine Suche über die Library List (*LIBL) erlauben. Die Library List definiert die Reihenfolge, in der das System nach Objekten sucht; so können Anwendungen ohne harte Pfade arbeiten. Die zugrunde liegende Speicherverwaltung wird Single-Level-Store genannt: Plattenspeicher und Arbeitsspeicher werden vom System als ein großer Adressraum betrachtet. Dadurch müssen Operator:innen sich nicht um Laufwerksbuchstaben oder Mount-Punkte kümmern – Objekte bleiben logisch an ihrem Ort, egal auf welchem physischen Medium sie liegen.
+
+### Rollenverständnis: Operator vs. Entwickler
+Auf IBM i arbeiten mehrere Rollen eng zusammen:
+- **Operator:innen** überwachen Subsysteme, Jobs, Warteschlangen und Nachrichten. Sie reagieren auf Störungen, stoßen Sicherungen an und dokumentieren den Systemzustand.
+- **Entwickler:innen** erstellen Anwendungen (z. B. RPG, COBOL, CL, SQL) und definieren Abläufe. Sie benötigen Operator-Feedback zu Laufzeitproblemen, verlassen sich aber darauf, dass Operator:innen das System stabil halten.
+- **Admins/Architekt:innen** definieren Sicherheit, Netzwerke, PTF-Stände und strategische Vorgaben.
+Ein gesundes Rollenverständnis bedeutet: Operator:innen wissen, wann sie Eingriffe selbst vornehmen (Job neu starten, Druckqueue leeren) und wann sie Entwickler:innen oder Admins einbinden (Programmfehler, Authority-Fragen). Dokumentation und Kommunikation sind daher essenziell.
 
 ## 2. Arbeiten auf der IBM i
-
-- Green-Screen, ACS, 5250
-- Navigation, PF-Tasten, Hilfe-System
-- Menüs und typische Arbeitsoberflächen
+- **Green-Screen, ACS, 5250**: Die klassische Bedienoberfläche ist ein 5250-Terminal. Heute wird sie häufig über Access Client Solutions (ACS) oder Web-Terminals bereitgestellt. Operator:innen sollten sowohl den Green-Screen als auch ACS-Funktionen kennen (SQL-Editor, PTF-Management, IFS-Zugriff).
+- **Navigation, PF-Tasten, Hilfe-System**: Jede Maske zeigt unten, welche Funktionstasten (PF1–PF24) aktiv sind. PF1 liefert kontextbezogene Hilfe, PF3 geht zurück, PF9 springt vorwärts. Mit `F`-Feldern und Eingabekommandos können Sie direkt Aktionen auslösen.
+- **Menüs und typische Arbeitsoberflächen**: `GO MAIN` oder kundenspezifische Menüs strukturieren Aufgaben (z. B. Überwachung, Druck, Sicherung). Lernen Sie die wichtigsten Menüs Ihrer Umgebung auswendig, um schneller auf Vorfälle zu reagieren.
 
 ---
 
 # **Teil 2 – Work Management**
 
 ## 3. Subsysteme
-
-- Aufbau, Zweck
-- Wichtige Subsysteme (QINTER, QBATCH, QSPL etc.)
-- Starten/Stoppen, Status erkennen (STRSBS, ENDSBS)
+Subsysteme bündeln Jobs mit ähnlichen Aufgaben. `QINTER` bedient interaktive Nutzer:innen, `QBATCH` führt Batchjobs aus, `QSPL` verarbeitet Spool-Dateien. Operator:innen starten Subsysteme mit `STRSBS` und beenden sie kontrolliert mit `ENDSBS`. Überwachungsbefehle wie `WRKSBS` zeigen Status und Jobanzahl.
 
 ## 4. Jobs verstehen
-
-- Interactive vs. Batch
-- Jobstruktur, Jobattribute
-- WRKJOB, WRKUSRJOB, WRKACTJOB
-- MSGW: was es bedeutet, wie man reagiert
-- Job-Logs lesen und typische Muster erkennen
+Jobs laufen entweder interaktiv oder als Batch. Wichtige Anzeigen sind `WRKJOB`, `WRKUSRJOB` und `WRKACTJOB`, die Struktur, Attribute und aktuelle Aktivität liefern. Meldung `MSGW` (Message Waiting) bedeutet, dass ein Job auf Eingaben wartet. Operator:innen müssen Job-Logs lesen, um Muster wie Berechtigungsfehler, fehlende Objekte oder Zeitüberschreitungen zu erkennen.
 
 ## 5. Warteschlangen im Alltag
-
-- OUTQ (Druckqueues), JOBQ (Jobqueues), MSGQ
-- WRKOUTQ, WRKJOBQ, WRKMSGQ
-- Staus erkennen, freigeben, Druckprobleme lösen
+Warteschlangen (Queues) organisieren Arbeitsschritte: Druck (`OUTQ`), Batch-Jobs (`JOBQ`) und Nachrichten (`MSGQ`). Mit `WRKOUTQ`, `WRKJOBQ` oder `WRKMSGQ` sehen Sie Staus, geben Einträge frei oder lösen Druckprobleme. Typisch: „FULL“-Status bei OUTQs, blockierende Nachrichten in `QSYSOPR`.
 
 ---
 
 # **Teil 3 – Arbeiten mit Daten**
 
 ## 6. Objekte und Bibliotheken
-
-- WRKOBJ, DSPOBJD
-- Libraries, Library Lists, *LIBL
-- Filetypen: PF, LF, SAVF, CMD, PRTF, DSPF
+Werkzeuge wie `WRKOBJ` oder `DSPOBJD` listen Objekte. Library Lists (*LIBL) bestimmen die Suchreihenfolge. Häufige Objektarten: physische Dateien (PF), logische Dateien (LF), Savefiles (SAVF), Kommandos (CMD), Printer-Displays (PRTF) oder Display-Files (DSPF).
 
 ## 7. Mit Daten arbeiten
-
-- STRSQL für Operator: grundlegende SELECTs
-- RUNQRY & Query Tool
-- DSPFFD, DSPPFM, DSPLIB
+`STRSQL` bietet interaktive SQL-Abfragen – für Operator:innen reichen meist einfache `SELECT`, `COUNT` und `WHERE`. `RUNQRY` bzw. Query/400 liefern gespeicherte Abfragen. Strukturinformationen erhalten Sie via `DSPFFD`, Inhalt über `DSPPFM`, Bibliotheken über `DSPLIB`.
 
 ## 8. Journaling & Recovery
-
-- Was ist ein Journal?
-- Wofür wird es genutzt?
-- Journalstatus prüfen, typische Probleme erkennen
+Journale protokollieren Datenänderungen. Sie sichern Recovery-Möglichkeiten, unterstützen Replikationen und helfen bei Fehleranalysen. Prüfen Sie den Journalstatus (z. B. `DSPJRN`, `DSPFD`) und achten Sie auf Warnungen wie „Journal Receiver approaching capacity“. Typische Probleme sind volllaufende Journal-Receiver oder fehlende Sicherungen.
 
 ---
 
 # **Teil 4 – Systembetrieb**
 
 ## 9. Systemüberwachung
-
-- WRKSYSSTS
-- Performance-Übersichten (WRKSYSACT, WRKDSKSTS)
-- CPU, Speicher, disk pooling verstehen
-- Jobs, die „hängen“ vs. Jobs, die „arbeiten“
+`WRKSYSSTS` zeigt CPU- und Speicherlast, `WRKSYSACT` aktive Jobs, `WRKDSKSTS` den Plattenstatus. Beobachten Sie CPU-Spitzen, Paging und Disk-Pools, um zwischen hängenden und arbeitenden Jobs zu unterscheiden.
 
 ## 10. Nachrichten & Operator-Aufgaben
-
-- QSYSOPR: lesen, verstehen, filtern
-- Reaktionen auf Systemnachrichten
-- Nachrichtentexte richtig interpretieren
+`QSYSOPR` ist die zentrale Nachrichtenwarteschlange. Nutzen Sie Filter, um kritische Meldungen (CPI, CPF) schnell zu bewerten. Reagieren Sie anhand hinterlegter Prozeduren, interpretieren Sie Text und Hilfeseiten (PF1) korrekt.
 
 ## 11. Backup & Restore (BRMS optional)
-
-- Grundkonzepte von SAVLIB, SAVOBJ
-- Sicherungen prüfen
-- Restore-Grundlagen: RSTLIB, RSTOBJ
-- Handling von Savefiles (SAVF)
+Grundbefehle sind `SAVLIB`, `SAVOBJ` und – für Restores – `RSTLIB`, `RSTOBJ`. Prüfen Sie Sicherungen durch Logauswertung oder BRMS-Reports. Savefiles (SAVF) dienen als Container für Transporte und müssen gepflegt werden (Größe, Löschung nach Nutzung).
 
 ---
 
 # **Teil 5 – Sicherheit**
 
 ## 12. Benutzer & Berechtigungen
-
-- Benutzerprofile anlegen (GRTOBJAUT, CHGUSRPRF)
-- Gruppenprofile
-- Passwortpolitik
-- Authority Concepts: *PUBLIC, Adopted Authority
+Benutzerprofile werden mit `CRTUSRPRF` erstellt, Berechtigungen mit `GRTOBJAUT` vergeben und mit `CHGUSRPRF` angepasst. Gruppenprofile vereinfachen Administration. Eine klare Passwortpolitik und das Verständnis von *PUBLIC sowie „Adopted Authority“ verhindern Sicherheitslücken.
 
 ## 13. Audit & Logging
-
-- Objektänderungsprotokolle
-- System Logs (DSPLOG)
-- Wichtige Befehle für Überblick
+Über `DSPLOG` oder Security-Audits (QAUDJRN) lassen sich Aktivitäten nachvollziehen. Objektänderungsprotokolle helfen bei Compliance-Anforderungen. Legen Sie fest, welche Befehle regelmäßig geprüft werden müssen, um einen Überblick zu behalten.
 
 ---
 
 # **Teil 6 – Betrieb im Alltag**
 
 ## 14. Typische Fehler und deren Analyse
-
-- Job in MSGW
-- Full-outqueue
-- Locking-Probleme (WRKOBJLCK)
-- Dateikorruption (selten, aber wichtig)
+- **Job in MSGW**: Ursache analysieren, Meldung lesen, ggf. Antwort geben oder Entwickler informieren.
+- **Full-Outqueue**: Spool-Dateien löschen, verschieben oder Drucker prüfen.
+- **Locking-Probleme (`WRKOBJLCK`)**: Blockierer identifizieren, Jobs koordinieren.
+- **Dateikorruption**: Selten, aber über Journale und Backups prüfbar.
 
 ## 15. Schnittstellen & Dateien im IFS
-
-- IFS-Struktur
-- Arbeiten mit CPY, CPYTOSTMF, CPYFRMSTMF
-- Monitoring von Schnittstellenordnern
-- Permissions im IFS
+Der integrierte File System (IFS) spiegelt eine UNIX-ähnliche Struktur. Befehle wie `CPY`, `CPYTOSTMF` oder `CPYFRMSTMF` übertragen Daten zwischen Bibliotheken und IFS. Überwachungsskripte prüfen Eingangsordner, Berechtigungen werden über IFS-ACLs gesteuert.
 
 ## 16. Systemupdates & PTFs (kurz)
-
-- PTF-Konzept
-- ACS-PTF-Funktion
-- What to know as operator (Nicht: Wie man alles selbst einspielt)
+Program Temporary Fixes (PTFs) halten das System aktuell. ACS bietet eine PTF-Funktion zur Anzeige und Installation. Operator:innen müssen wissen, wie man den Status abfragt, Wartungsfenster koordiniert und wann Spezialist:innen (Admins) hinzugezogen werden.
 
 ---
 
 # **Teil 7 – Praxisfälle**
 
 ## 17. Fall 1: Job hängt in MSGW
-
-- Ursachen
-- Analyse
-- Vorgehen
+Analysieren Sie Meldungstext, prüfen Sie Joblog und Aufrufparameter. Häufige Ursachen: fehlende Ressourcen, Berechtigungen oder Anwenderabfragen. Vorgehen: Nachricht beantworten oder Job geordnet beenden und Entwickler:innen informieren.
 
 ## 18. Fall 2: OUTQ staut
-
-- Druck hängt
-- Spoolfiles prüfen
-- Konfiguration verstehen
+Kontrollieren Sie `WRKOUTQ`, prüfen Sie Status der Druckergeräte (`WRKDEVD`). Spoolfiles können on hold sein oder Drucker offline. Lösen Sie Blocks, priorisieren Sie kritische Spools.
 
 ## 19. Fall 3: Batchjobs laufen nicht mehr
-
-- JOBQ blockiert
-- Subsystem-Probleme
-- Abhängigkeiten prüfen
+Jobqueue (`WRKJOBQ`) prüfen: Ist sie gehalten? Sind Subsysteme aktiv? Eventuell blockieren Abhängigkeiten oder Ressourcen (z. B. Journale). Freigeben, Subsysteme starten oder Problemmeldung eskalieren.
 
 ## 20. Fall 4: Schnittstelle steht still
-
-- Datei nicht angekommen
-- Locking
-- Fehlermeldungen in QSYSOPR
-- Troubleshooting
+Kontrollieren Sie IFS-Ordner, prüfen Sie Locks (`WRKOBJLCK`), sehen Sie sich `QSYSOPR`-Meldungen an. Fehlerhafte Dateien oder fehlende Netzwerkverbindungen sind typische Ursachen. Dokumentieren Sie Schritte und informieren Sie Beteiligte.
 
 ---
 
 # **Teil 8 – Professionalität**
 
 ## 21. Operator-Routinen
-
-- Tagescheckliste
-- Wochen- und Monatsaufgaben
-- Protokollierung
-- Kommunikation mit Admins & Devs
+Erstellen Sie Checklisten für tägliche (Subsystem-Status, Nachrichten, Backups), wöchentliche (PTF-Prüfung, Speicherchecks) und monatliche Aufgaben (Sicherungs-Tests, Kapazitätsplanung). Protokollieren Sie Maßnahmen und teilen Sie Ergebnisse mit Admins und Devs.
 
 ## 22. Zusammenarbeit und Rollen
-
-- Wann zum Entwickler?
-- Wann zum Admin/Architekt?
-- Wie man professionell dokumentiert
+Definieren Sie Eskalationswege: Wann reicht Operator-Intervention, wann braucht es Entwickler:innen oder Architekt:innen? Dokumentieren Sie Vorfälle strukturiert (Zeit, Job, Fehlermeldung, Aktion), um professionell zu kommunizieren.
 
 ---
 
 # **Teil 9 – Ausblick**
 
 ## 23. Die Plattform heute und morgen
-
-- Modernisierung
-- Integration
-- Zukunft von IBM i
-- Wie Operator in Richtung Sysadmin oder Systementwickler wachsen können
-b) und gehe sinnvoll, in rationaler Tiefe für Einsteiger:innen und (Berufseinsteiger/Quereinsteiger) auf folgendes ein im ersten Teil:
-# **Teil 1 – Grundverständnis**
-
-## 1. Was ist IBM i?
-
-- Architektur, Historie
-- Library-Konzept, Objekte, Single-Level-Store
-- Rollenverständnis: Operator vs. Entwickler
+IBM i entwickelt sich Richtung Modernisierung (z. B. RPG Free, Open-Source-Unterstützung), Integration (REST, APIs, Db2 Services) und Cloud-Modelle. Operator:innen können sich zum/zur Systemadministrator:in oder Systementwickler:in weiterentwickeln, indem sie Automatisierung, Scripting (CL, Python, SQL Services) und Sicherheitskonzepte vertiefen.
